@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+  <Transactions>
+    <Transaction>2024.11.12 10:13:39.155,D:\Projects\Delphi\TestAndSobes\DLL2\lib2.dproj=C:\Users\Maxim\Documents\Embarcadero\Studio\Projects\Project1.dproj</Transaction>
+    <Transaction>2024.11.12 10:13:55.147,=D:\Projects\Delphi\TestAndSobes\Common\uTypeModule.pas</Transaction>
+    <Transaction>2024.11.12 10:14:18.320,=D:\Projects\Delphi\TestAndSobes\Common\uWinModule.pas</Transaction>
+    <Transaction>2024.11.12 18:24:14.458,=D:\Projects\Delphi\TestAndSobes\Common\uLog.pas</Transaction>
+  </Transactions>
+</BorlandProject>

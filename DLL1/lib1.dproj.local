@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>1899.12.30 00:00:00.000.027,D:\Projects\Delphi\TestAndSobes\DLL1\Unit1.pas=D:\Projects\Delphi\TestAndSobes\DLL1\uWinModule.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.884,=D:\Projects\Delphi\TestAndSobes\DLL1\Unit1.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.575,D:\Projects\Delphi\TestAndSobes\DLL1\Unit1.pas=D:\Projects\Delphi\TestAndSobes\DLL1\uLog.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.740,=D:\Projects\Delphi\TestAndSobes\DLL1\Unit1.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.217,C:\Users\Maxim\Documents\Embarcadero\Studio\Projects\Project1.dproj=D:\Projects\Delphi\TestAndSobes\DLL1\lib1.dproj</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.617,D:\Projects\Delphi\TestAndSobes\DLL1\uLog.pas=</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.881,D:\Projects\Delphi\TestAndSobes\DLL1\Unit1.pas=D:\Projects\Delphi\TestAndSobes\DLL1\uTypeModule.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.385,=D:\Projects\Delphi\TestAndSobes\DLL1\Unit1.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.609,=D:\Projects\Delphi\TestAndSobes\Common\uLog.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.925,D:\Projects\Delphi\TestAndSobes\DLL1\FindModule.pas=D:\Projects\Delphi\TestAndSobes\DLL1\uFindModule.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.649,=D:\Projects\Delphi\TestAndSobes\Common\uTypeModule.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.143,D:\Projects\Delphi\TestAndSobes\DLL1\uTypeModule.pas=</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.247,D:\Projects\Delphi\TestAndSobes\DLL1\Unit1.pas=D:\Projects\Delphi\TestAndSobes\DLL1\FindModule.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.160,=D:\Projects\Delphi\TestAndSobes\DLL1\Unit1.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.529,=D:\Projects\Delphi\TestAndSobes\DLL1\Unit1.pas</Transaction>
+  </Transactions>
+</BorlandProject>
