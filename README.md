@@ -22,8 +22,8 @@ MKO System: Test Task
 
 
 Пример2:
-*.txt
-*.pas
+*.txt  
+*.pas  
 
 
 ## Задача 2 (поиск вхождений)
@@ -38,11 +38,11 @@ MKO System: Test Task
 
 Пример:
 
-bar
-win
-end
-END
-WIN
+bar  
+win  
+end  
+END  
+WIN  
 
 
 
