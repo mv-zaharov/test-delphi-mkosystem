@@ -11,6 +11,13 @@ uses
 {$R *.res}
 
 begin
+   {$define FullDebugMode}    // Полный режим отладки (более подробные отчеты)
+   {$define LogMemoryLeaks}   // Логирование утечек памяти в файл
+
+
+  {$IFDEF DEBUG}
+  //ReportMemoryLeaksOnShutdown := True;
+  {$ENDIF}
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
   Application.CreateForm(TForm1, Form1);

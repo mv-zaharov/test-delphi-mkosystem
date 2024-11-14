@@ -3,7 +3,8 @@ unit TaskManager;
 interface
 
 uses
-  System.SysUtils, System.Classes, System.Threading, System.Generics.Collections;
+  System.SysUtils, System.Classes, System.Threading, System.Generics.Collections,
+  Windows, PsAPI;
 
 type
   TTaskEvent = procedure of object;
@@ -13,6 +14,7 @@ type
     FTask: ITask;
     FStopOnComplete: Boolean;
     FShouldRun: Boolean;
+    FCompleting: Boolean;
     FLock: TObject;
     FName: string;
     FID: Integer;
@@ -27,7 +29,7 @@ type
     property Name: string read FName;
     property ID: Integer read FID;
     property StringStatus: string read GetStatus;
-    property StopOnComplete: boolean read FStopOnComplete;
+    property StopOnComplete: boolean read FStopOnComplete write FStopOnComplete;
     property OnTaskStop: TTaskEvent read FOnTaskStop write FOnTaskStop;
   end;
 
@@ -35,6 +37,11 @@ type
   private
     FTasks: TObjectList<TLocalTask>;
     FCount: Integer;
+    FOnChangeStatus: TTaskEvent;
+    FIsWaitingTask: Boolean;   // true - если есть задачи ожидающие запуска
+    function IsMemoryAvailable(RequiredMemoryMB: Cardinal): Boolean;
+    function AreCPUCoresAvailable: Boolean;
+    procedure FOnTaskStop;
   public
     constructor Create;
     destructor Destroy; override;
@@ -45,7 +52,10 @@ type
     procedure StopTask(const ID: integer); overload;
     function FindTaskByName(const AName: string): TLocalTask;
     function FindTaskByID(const ID: Integer): TLocalTask;
+    function GetStatus(const AName: string): String;
     property Count: Integer read FCount;
+    property OnChangeStatus: TTaskEvent read FOnChangeStatus write FOnChangeStatus;
+    property IsWaitingTask: Boolean read FIsWaitingTask;
   end;
 
 implementation
@@ -76,7 +86,6 @@ begin
 
         if FStopOnComplete then Stop;
 
-
       end;
     end);
 end;
@@ -91,12 +100,15 @@ end;
 function TLocalTask.GetStatus: string;
 begin
   Result := 'В ожидании';
-  case FTask.Status of
-    TTaskStatus.Created: Result := 'В ожидании';
-    TTaskStatus.WaitingToRun,
-    TTaskStatus.Running: Result := 'Выполняется';
-    else Result := 'Завершена';
-  end;
+  if FCompleting
+    then Result := 'Завершена'
+    else
+      case FTask.Status of
+        TTaskStatus.Created: Result := 'В ожидании';
+        TTaskStatus.WaitingToRun,
+        TTaskStatus.Running: Result := 'Выполняется';
+        else Result := 'Завершена';
+      end;
 
 end;
 
@@ -110,7 +122,7 @@ begin
   end;
 
   if (FTask.Status = TTaskStatus.Created) then
-    FTask.Start;
+      FTask.Start;
 
 end;
 
@@ -127,8 +139,11 @@ begin
   begin
     //FTask.Wait;
     //FTask := nil;
-
   end;
+
+  FCompleting := true;
+  if Assigned(FOnTaskStop) then
+    FOnTaskStop;
 
 
 end;
@@ -148,6 +163,7 @@ end;
 constructor TTaskManager.Create;
 begin
   FTasks := TObjectList<TLocalTask>.Create(True);
+  FIsWaitingTask := False;
   FCount := 0;
 end;
 
@@ -171,7 +187,11 @@ var
 begin
   LocalTask := TLocalTask.Create(ID, AName, ATaskProcedure);
 
+  if Assigned(FOnChangeStatus)
+    then LocalTask.OnTaskStop := FOnTaskStop;
+
   FTasks.Add(LocalTask);
+
   inc(FCount);
 end;
 
@@ -180,8 +200,16 @@ var
   Task: TLocalTask;
 begin
   Task := FindTaskByName(AName);
-  if Assigned(Task) then
-    Task.Start;
+
+  if IsMemoryAvailable(10) and AreCPUCoresAvailable
+    then begin
+      if Assigned(Task) then
+        Task.Start
+    end
+    else begin
+
+    end;
+
 end;
 
 procedure TTaskManager.StartTask(const ID: integer);
@@ -233,6 +261,51 @@ begin
       Exit(Task);
 
   Result := nil;
+end;
+
+function TTaskManager.GetStatus(const AName: string): String;
+begin
+
+  Result := 'Уточняется';
+  if FindTaskByName(AName) <> nil
+    then Result := FindTaskByName(AName).GetStatus;
+
+end;
+
+function TTaskManager.IsMemoryAvailable(RequiredMemoryMB: Cardinal): Boolean;
+var
+  MemStatus: TMemoryStatus;
+begin
+  MemStatus.dwLength := SizeOf(TMemoryStatus);
+  GlobalMemoryStatus(MemStatus);
+
+  // Проверяем, доступно ли больше оперативной памяти, чем требуется
+  Result := (MemStatus.dwAvailPhys > RequiredMemoryMB * 1024 * 1024);
+end;
+
+procedure TTaskManager.FOnTaskStop;
+begin
+  if Assigned(FOnChangeStatus)
+    then begin
+      FOnChangeStatus;
+
+      //можно организовать логику запуска задач, которые стоят в ожидании ресурсов
+      //if FIsWaitingTask then
+
+    end;
+
+end;
+
+function TTaskManager.AreCPUCoresAvailable: Boolean;
+var
+  SysInfo: TSystemInfo;
+begin
+  GetSystemInfo(SysInfo);
+
+  // Предположим, что приложение рассматривает наличие хотя бы одного свободного ядра
+  // (дополнительно можно усложнить проверку через использование System.Diagnostics для лучшего результата).
+  // Здесь просто возвращаем True для примера.
+  Result := True;
 end;
 
 end.

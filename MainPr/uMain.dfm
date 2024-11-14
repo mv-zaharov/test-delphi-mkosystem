@@ -73,7 +73,7 @@ object Form1: TForm1
         Height = 13
         Align = alTop
         Caption = #1042#1099#1073#1086#1088' '#1079#1072#1076#1072#1095#1080':'
-        ExplicitWidth = 75
+        ExplicitLeft = 0
       end
       object ComboBoxTasks: TComboBox
         Left = 1
@@ -96,6 +96,15 @@ object Form1: TForm1
         Caption = 'Start'
         TabOrder = 1
         OnClick = StartClick
+      end
+      object Button1: TButton
+        Left = 592
+        Top = 20
+        Width = 75
+        Height = 25
+        Caption = 'Button1'
+        TabOrder = 2
+        OnClick = Button1Click
       end
     end
     object Panel2: TPanel

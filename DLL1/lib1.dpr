@@ -68,7 +68,7 @@ begin
     if ( (Count < 1) or (StartDir.Length < 3) )
     then begin
       // Пришли плохие параметры или они отсутствуют
-      tmpText.Add('Number of files (directories) = 0');
+      tmpText.Add('Number of files = 0');
       ToLog(resultFileName, 'Ошибка: неправильные параметры');
     end
     else begin
@@ -86,7 +86,7 @@ begin
 
       //Сохраним результаты поиска
       tmpText.Add('Folder: ' + StartDir);
-      tmpText.Add('Number of files (directories): ' + rs.FileCount.ToString);
+      tmpText.Add('Number of files: ' + rs.FileCount.ToString);
       tmpText.AddStrings(rs.FilePaths);
 
       ToLog(resultFileName, tmpText.Text, False);
@@ -112,11 +112,12 @@ function FindTextOccurrences(ID: Integer; Data: PPAnsiCharArray; PLengths: PInte
   // Count - количество передаваемых строк
   // Result = количество найденных последовательностей.
 var
-  str,key,
+  str,
+  key,
   resultFileName,
   dataFileName: string;
   sequences: array of string;
-  tmpText: TStrings;
+  tmpText, tmpText2: TStrings;
   rs: TTextSearchResult;
   fBytes: TBytes;
   i,Len, value: Integer;
@@ -168,13 +169,26 @@ begin
       tmpText.Add('File: ' + dataFileName);
       tmpText.Add('Number of sequences: ' + rs.TextCount.ToString);
 
-
+      tmpText2 := TStringList.Create;
       for key in rs.TextPositions.Keys do
       begin
-        tmpText.Add(key + ': ');
+        //tmpText.Add(key + ': ');
+        tmpText2.Clear;
+        i := 0;
         Values := rs.TextPositions[key];
         for value in Values do
-          tmpText.Add('     ' + value.ToString + ', ');
+          begin
+            tmpText2.Add('     ' + value.ToString + ', ');
+            inc(i);
+          end;
+
+        if tmpText2.Count<1
+          then tmpText.Add(key + ': - ')
+          else begin
+            tmpText.Add(key + ' ( ' + i.ToString + ' вх.):');
+            tmpText.AddStrings(tmpText2);
+          end;
+
       end;
 
       ToLog(resultFileName, tmpText.Text, False);
@@ -191,6 +205,7 @@ begin
       rs.TextPositions.Free;
     end;
     tmpText.Free;
+    tmpText2.Free;
 
   end;
 

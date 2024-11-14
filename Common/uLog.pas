@@ -28,7 +28,7 @@ begin
   {$IFDEF MSWINDOWS}
 
 
-  if not DirectoryCreated then
+  if not DirectoryExists(DirectoryResult) then
   begin
     DirectoryCreated:=True;
     TDirectory.CreateDirectory(DirectoryResult);

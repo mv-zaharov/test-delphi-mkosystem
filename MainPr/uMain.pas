@@ -31,14 +31,17 @@ type
     StringGridTask: TStringGrid;
     Label3: TLabel;
     Memo1: TMemo;
+    Button1: TButton;
     procedure StartClick(Sender: TObject);
     procedure RadioGroupDLLClick(Sender: TObject);
     procedure ComboBoxTasksChange(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure StringGridTaskSelectCell(Sender: TObject; ACol, ARow: Integer;
       var CanSelect: Boolean);
+    procedure Button1Click(Sender: TObject);
   private
     { Private declarations }
+    FFirstResult: Boolean;
     FID,
     FStartID: Integer;
     FStartDir,
@@ -50,7 +53,8 @@ type
     FListParamText: TStrings;
     FRadioGroupItem: Integer;
     FTaskManager: TTaskManager;
-    procedure UpdateInfo;
+    procedure UpdateInfo(const ID: Integer; const AName: string);
+    procedure UpdateStatus;
     function NextID: Integer;
     procedure ProgressStatus(ID, Progress: Integer; Status: PAnsiChar); stdcall;
     procedure StartTaskArc(ID: Integer);
@@ -72,6 +76,63 @@ implementation
 
 
 {$R *.dfm}
+
+function GenerateRandomStrings: TStrings;
+var
+  TotalChars, CharsRemaining, LineLength, i: Integer;
+  RandomStr: string;
+const
+  CharSet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+begin
+  Result := TStringList.Create;
+  TotalChars := 1000000;
+  CharsRemaining := TotalChars;
+
+  Randomize; // Инициализируем генератор случайных чисел
+
+  while CharsRemaining > 0 do
+  begin
+    // Генерируем случайную длину строки (не больше оставшихся символов)
+    LineLength := Random(CharsRemaining) + 1;
+
+    RandomStr := '';
+    for i := 1 to LineLength do
+    begin
+      // Выбираем случайный символ из набора CharSet
+      RandomStr := RandomStr + CharSet[Random(Length(CharSet)) + 1];
+    end;
+
+    Result.Add(RandomStr);
+    Dec(CharsRemaining, LineLength);
+  end;
+end;
+
+
+procedure AppendToFile(const FileName: string; Lines: TStrings);
+var
+  FileStream: TFileStream;
+begin
+
+  if not FileExists(FileName)
+    then begin
+      form1.Memo1.Clear;
+      form1.Memo1.Lines.SaveToFile(FileName)
+    end;
+
+
+  // Открываем файл для добавления данных в конец
+  FileStream := TFileStream.Create(FileName, fmOpenReadWrite or fmShareDenyWrite);
+  try
+    FileStream.Seek(0, soEnd); // Переходим в конец файла
+    Lines.SaveToStream(FileStream, TEncoding.UTF8);
+
+  finally
+    FileStream.Free;
+  end;
+end;
+
+
+
 
 procedure status(ID, Progress: Integer; Status: PAnsiChar); stdcall;
 begin
@@ -95,6 +156,11 @@ begin
     begin
       taskName := 'Lib2_Arc_'+id.ToString;
 
+      // заполняем параметры
+      //FCommandLine := ...
+      FCommandSrc := LabeledEditArcSrc.Text;
+      FCommandDst := LabeledEditArcDst.Text;
+
       FTaskManager.AddTask(id,taskName,
         procedure
         begin
@@ -103,20 +169,36 @@ begin
           ToLog(id.ToString, 'Task completed.');
         end);
 
+      UpdateInfo(id, taskName);
+
       FTaskManager.StartTask(id);
 
     end;
     else begin
-      Data := TStringList.Create;
 
       Data := TStringList.Create;
-      Data.Add(form1.LabeledEditPath.Text);
-      Data.AddStrings(Memo2.Lines);
 
       taskName := 'Lib1_';
-      case form1.ComboBoxTasks.ItemIndex of
-        1: taskName := taskName + 'FindText_';
-        else taskName := taskName + 'FindFile_';
+      case ComboBoxTasks.ItemIndex of
+        1:
+        begin
+          taskName := taskName + 'FindText_';
+          FFilePath := LabeledEditPath.Text;
+          FListParamText.Clear;
+          FListParamText.AddStrings(Memo2.Lines);
+
+          Data.Add(FFilePath);
+          Data.AddStrings(FListParamText);
+        end
+        else begin
+          taskName := taskName + 'FindFile_';
+          FStartDir := LabeledEditPath.Text;
+          FListParamMask.Clear;
+          FListParamMask.AddStrings(Memo2.Lines);
+
+          Data.Add(FStartDir);
+          Data.AddStrings(FListParamMask);
+        end;
       end;
 
       taskName := taskName + id.ToString;
@@ -125,18 +207,48 @@ begin
         procedure
         begin
           ToLog(id.ToString, 'Task started.');
-          //r := GetTasks(2, @Masks, @Lns, n);
+          //r := GetTasks(2, @Masks, @Lns, n);  // для теста
           StartTaskFind(id, Data);      // lib1.dll
           ToLog(id.ToString, 'Task completed.');
         end);
+
+      UpdateInfo(id, taskName);
 
       FTaskManager.StartTask(id);
 
     end;
   end; //case RadioGroupDLL.ItemIndex of
 
-  UpdateInfo;
 
+end;
+
+procedure TForm1.Button1Click(Sender: TObject);
+//генерация данных для теста
+const
+  n = 500;
+  fn: string = 'D:\Projects\Delphi\TestAndSobes\MainPr\Win32\Debug\test.txt';
+var
+  RandomStrings: TStrings;
+
+begin
+
+  try
+    for var i := 0 to n-1 do
+      begin
+        RandomStrings := GenerateRandomStrings;
+        AppendToFile('text.txt', RandomStrings);
+      end;
+
+    RandomStrings.clear;
+    if FileExists(fn)
+      then begin
+        RandomStrings.LoadFromFile(fn);
+        AppendToFile('text.txt', RandomStrings);
+      end;
+
+  finally
+    RandomStrings.Free;
+  end;
 end;
 
 procedure TForm1.ComboBoxTasksChange(Sender: TObject);
@@ -202,13 +314,27 @@ begin
   FListParamText := TStringList.Create;
 
   FTaskManager := TTaskManager.Create;
+  FTaskManager.OnChangeStatus := UpdateStatus;
+
+  // Устанавливаем заголовки для StringGrid1
+  StringGridTask.Cells[0, 0] := 'ID';
+  StringGridTask.Cells[1, 0] := 'Name';
+  StringGridTask.Cells[2, 0] := 'Status';
+
+  StringGridTask.ColWidths[0] := 50;
+  StringGridTask.ColWidths[1] := 150;
+  StringGridTask.ColWidths[2] := 200;
+
+  StringGridTask.RowCount := 2;
+
 
   //путь для запуска архивации:
-  //FCommandLine := 'C:\Program Files\7z.exe';
+  //FCommandLine := 'C:\Program Files\...\7z.exe';  ???
   //FCommandLine := 'C:\Program Files (x86)\WinRAR\WinRAR.exe';
   FCommandLine := 'C:\Program Files (x86)\WinRAR\Rar.exe';
 
   //для теста
+
   FStartDir:='D:\Projects\Delphi\TestAndSobes\01';
   FListParamMask.Add('*.txt');
 
@@ -224,17 +350,6 @@ begin
 
   //----для теста----//
 
-  // Устанавливаем заголовки для StringGrid1
-  StringGridTask.Cells[0, 0] := 'ID';
-  StringGridTask.Cells[1, 0] := 'Name';
-  StringGridTask.Cells[2, 0] := 'Status';
-
-  StringGridTask.ColWidths[0] := 50;
-  StringGridTask.ColWidths[1] := 150;
-  StringGridTask.ColWidths[2] := 200;
-
-  StringGridTask.RowCount := 2;
-
 end;
 
 destructor TForm1.Destroy;
@@ -242,6 +357,7 @@ begin
   FTaskManager.Destroy;
   FListParamMask.Free;
   FListParamText.Free;
+
   inherited;
 end;
 
@@ -259,6 +375,8 @@ begin
   RadioGroupDLL.ItemIndex := 0;
   ComboBoxTasks.ItemIndex := 0;
   ComboBoxTasksChange(Sender);
+
+  FFirstResult := False;
 
 end;
 
@@ -323,10 +441,6 @@ begin
       raise exception.Create('[Неудачный вызов GetProcAddress]');
 
   try
-
-    // заполняем параметры
-    FCommandSrc := LabeledEditArcSrc.Text;
-    FCommandDst := LabeledEditArcDst.Text;
 
     cmdLine := AnsiStrAlloc(FCommandLine.Length + 1);
     StrPCopy(cmdLine, AnsiString(FCommandLine));
@@ -428,14 +542,32 @@ begin
 
 end;
 
-procedure TForm1.UpdateInfo;
+procedure TForm1.UpdateInfo(const ID: Integer; const AName: string);
 var
   FTask: TLocalTask;
   i,j: Integer;
 begin
-  //StatusBar1.Panels[0].Text := 'Задача: -';
-  //StatusBar1.Panels[1].Text := 'Статус: ';
+  StatusBar1.Panels[0].Text := 'Задача: -';
+  StatusBar1.Panels[1].Text := 'Статус: ';
 
+  i := FTaskManager.Count;
+
+  StringGridTask.RowCount := i + 1;
+
+  StringGridTask.Cells[0, i] := ID.ToString;  // ID задачи
+  StringGridTask.Cells[1, i] := AName; // имя задачи
+  StringGridTask.Cells[2, i] := 'Выполняется'; // статус задачи
+
+  if not FFirstResult
+    then begin
+      Memo1.Clear;
+      FFirstResult := true;
+      Memo1.Lines.Add('Не выбран элемент для просмотра');
+    end;
+
+  Panel3.Visible := true;
+
+  {
   if FTaskManager.Count<1 then
     Exit;
 
@@ -443,38 +575,38 @@ begin
   StringGridTask.RowCount := FTaskManager.Count + 1;
 
   i:=0;
-
-  //for i := 0 to FTaskManager.Count-1 do
-    //begin
-      for j := FStartID to FID do
-        begin
-          FTask := FTaskManager.FindTaskByID(j);
-          if Assigned(FTask)
-            then begin
-              StringGridTask.Cells[0, i + 1] := FTask.ID.ToString;//(i + 1); // id задачи
-              StringGridTask.Cells[1, i + 1] := FTask.Name; // имя задачи
-              StringGridTask.Cells[2, i + 1] := FTask.StringStatus;
-              inc(i);
-            end;
-        end;
-    //end;
-
-            {
-      if FTask <> nil
+  for j := FStartID to FID do
+    begin
+      FTask := FTaskManager.FindTaskByID(j);
+      if Assigned(FTask)
         then begin
-
-          StringGridTask.Cells[2, i + 1] := FTask.Status; // статус задачи
-        end
-        else begin
-          StringGridTask.Cells[0, i + 1] := IntToStr(i + 1); // id задачи
-          StringGridTask.Cells[1, i + 1] := ' - '; // имя задачи
-          StringGridTask.Cells[2, i + 1] := 'Завершена'; // статус задачи
+          StringGridTask.Cells[0, i + 1] := FTask.ID.ToString;  // ID задачи
+          StringGridTask.Cells[1, i + 1] := FTask.Name; // имя задачи
+          StringGridTask.Cells[2, i + 1] := FTask.StringStatus; // статус задачи
+          inc(i);
         end;
-        }
+    end;
 
   Panel3.Visible := true;
+  }
 
 end;
 
+
+procedure TForm1.UpdateStatus;
+var
+  i: Integer;
+  taskName: string;
+begin
+  if ( (FTaskManager.Count<1) or (not Panel3.Visible) ) then
+    Exit;
+
+  for i := 1 to StringGridTask.RowCount - 1 do
+    begin
+      taskName:=StringGridTask.Cells[1,i];
+      StringGridTask.Cells[2, i] := FTaskManager.GetStatus(taskName)
+    end;
+
+end;
 
 end.
