@@ -31,14 +31,12 @@ type
     StringGridTask: TStringGrid;
     Label3: TLabel;
     Memo1: TMemo;
-    Button1: TButton;
     procedure StartClick(Sender: TObject);
     procedure RadioGroupDLLClick(Sender: TObject);
     procedure ComboBoxTasksChange(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure StringGridTaskSelectCell(Sender: TObject; ACol, ARow: Integer;
       var CanSelect: Boolean);
-    procedure Button1Click(Sender: TObject);
   private
     { Private declarations }
     FFirstResult: Boolean;
@@ -76,62 +74,6 @@ implementation
 
 
 {$R *.dfm}
-
-function GenerateRandomStrings: TStrings;
-var
-  TotalChars, CharsRemaining, LineLength, i: Integer;
-  RandomStr: string;
-const
-  CharSet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-begin
-  Result := TStringList.Create;
-  TotalChars := 1000000;
-  CharsRemaining := TotalChars;
-
-  Randomize; // Инициализируем генератор случайных чисел
-
-  while CharsRemaining > 0 do
-  begin
-    // Генерируем случайную длину строки (не больше оставшихся символов)
-    LineLength := Random(CharsRemaining) + 1;
-
-    RandomStr := '';
-    for i := 1 to LineLength do
-    begin
-      // Выбираем случайный символ из набора CharSet
-      RandomStr := RandomStr + CharSet[Random(Length(CharSet)) + 1];
-    end;
-
-    Result.Add(RandomStr);
-    Dec(CharsRemaining, LineLength);
-  end;
-end;
-
-
-procedure AppendToFile(const FileName: string; Lines: TStrings);
-var
-  FileStream: TFileStream;
-begin
-
-  if not FileExists(FileName)
-    then begin
-      form1.Memo1.Clear;
-      form1.Memo1.Lines.SaveToFile(FileName)
-    end;
-
-
-  // Открываем файл для добавления данных в конец
-  FileStream := TFileStream.Create(FileName, fmOpenReadWrite or fmShareDenyWrite);
-  try
-    FileStream.Seek(0, soEnd); // Переходим в конец файла
-    Lines.SaveToStream(FileStream, TEncoding.UTF8);
-
-  finally
-    FileStream.Free;
-  end;
-end;
-
-
 
 
 procedure status(ID, Progress: Integer; Status: PAnsiChar); stdcall;
@@ -220,35 +162,6 @@ begin
   end; //case RadioGroupDLL.ItemIndex of
 
 
-end;
-
-procedure TForm1.Button1Click(Sender: TObject);
-//генерация данных для теста
-const
-  n = 500;
-  fn: string = 'D:\Projects\Delphi\TestAndSobes\MainPr\Win32\Debug\test.txt';
-var
-  RandomStrings: TStrings;
-
-begin
-
-  try
-    for var i := 0 to n-1 do
-      begin
-        RandomStrings := GenerateRandomStrings;
-        AppendToFile('text.txt', RandomStrings);
-      end;
-
-    RandomStrings.clear;
-    if FileExists(fn)
-      then begin
-        RandomStrings.LoadFromFile(fn);
-        AppendToFile('text.txt', RandomStrings);
-      end;
-
-  finally
-    RandomStrings.Free;
-  end;
 end;
 
 procedure TForm1.ComboBoxTasksChange(Sender: TObject);

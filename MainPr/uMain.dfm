@@ -97,15 +97,6 @@ object Form1: TForm1
         TabOrder = 1
         OnClick = StartClick
       end
-      object Button1: TButton
-        Left = 592
-        Top = 20
-        Width = 75
-        Height = 25
-        Caption = 'Button1'
-        TabOrder = 2
-        OnClick = Button1Click
-      end
     end
     object Panel2: TPanel
       Left = 1
