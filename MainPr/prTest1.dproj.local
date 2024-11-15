@@ -2,8 +2,8 @@
 <BorlandProject>
   <Transactions>
     <Transaction>2024.11.10 20:48:50.326,=C:\Users\Maxim\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
-    <Transaction>2024.11.11 14:40:08.392,D:\Projects\Delphi\TestAndSobes\MainPr\uMain.dfm=C:\Users\Maxim\Documents\Embarcadero\Studio\Projects\Unit1.dfm</Transaction>
     <Transaction>2024.11.11 14:40:08.392,D:\Projects\Delphi\TestAndSobes\MainPr\uMain.pas=C:\Users\Maxim\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2024.11.11 14:40:08.392,D:\Projects\Delphi\TestAndSobes\MainPr\uMain.dfm=C:\Users\Maxim\Documents\Embarcadero\Studio\Projects\Unit1.dfm</Transaction>
     <Transaction>2024.11.11 14:40:28.452,D:\Projects\Delphi\TestAndSobes\MainPr\prTest1.dproj=C:\Users\Maxim\Documents\Embarcadero\Studio\Projects\Project1.dproj</Transaction>
     <Transaction>2024.11.11 15:02:06.922,=D:\Projects\Delphi\TestAndSobes\Common\uTypeModule.pas</Transaction>
     <Transaction>2024.11.11 15:09:32.496,D:\Projects\Delphi\TestAndSobes\Common\uTypeModule.pas=</Transaction>
@@ -12,5 +12,7 @@
     <Transaction>2024.11.12 12:15:25.807,D:\Projects\Delphi\TestAndSobes\MainPr\TaskManager.pas=D:\Projects\Delphi\TestAndSobes\MainPr\Unit1.pas</Transaction>
     <Transaction>2024.11.13 10:38:45.395,=D:\Projects\Delphi\TestAndSobes\Common\uLog.pas</Transaction>
     <Transaction>2024.11.13 10:39:55.182,=D:\Projects\Delphi\TestAndSobes\Common\uWinModule.pas</Transaction>
+    <Transaction>2024.11.15 14:10:00.275,=D:\Projects\Delphi\TestAndSobes\DLL1\uFindModule.pas</Transaction>
+    <Transaction>2024.11.15 14:56:47.940,D:\Projects\Delphi\TestAndSobes\DLL1\uFindModule.pas=</Transaction>
   </Transactions>
 </BorlandProject>

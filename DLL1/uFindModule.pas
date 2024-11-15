@@ -9,6 +9,7 @@ uses
 
 
 
+//function FFindFiles(const Masks: array of string; const StartDir: string): TFileSearchResult;
 function FFindTextOccurrences(const Sequences: array of string; const FilePath: string): TTextSearchResult;
 function FFindFiles(const Masks: array of string; const StartDir: string): TFileSearchResult;
 
@@ -17,20 +18,52 @@ implementation
 uses
   System.IOUtils;
 
-
+{
 function FFindFiles(const Masks: array of string; const StartDir: string): TFileSearchResult;
 var
   SearchRec: TSearchRec;
+  I: Integer;
+  Mask: string;
+  Found: Integer;
+  FullPath: string;
+begin
+  Result.FileCount := 0;
+  Result.FilePaths := TStringList.Create;
+
+  for I := Low(Masks) to High(Masks) do
+  begin
+    Mask := IncludeTrailingPathDelimiter(StartDir) + Masks[I];
+
+    Found := FindFirst(Mask, faAnyFile and not faDirectory, SearchRec);
+    try
+      while Found = 0 do
+      begin
+        FullPath := TPath.Combine(StartDir, SearchRec.Name);
+        Result.FilePaths.Add(FullPath);
+        Inc(Result.FileCount);
+        Found := FindNext(SearchRec);
+      end;
+    finally
+      FindClose(SearchRec);
+    end;
+  end;
+end;
+}
+
+function FFindFiles(const Masks: array of string; const StartDir: string): TFileSearchResult;
+var
   lowInd,
   highInd,
   l,h,
   I: Integer;
   Mask, FullPath: string;
-  Found: Integer;
+
 
   procedure SearchInDirectory(const Directory: string);
   var
     SubDir: string;
+    SearchRec: TSearchRec;
+    Found: Integer;
   begin
 
     lowInd:= Low(Masks);
@@ -58,8 +91,8 @@ var
 
     // Поиск субдиректорий
     //ToLog('log', 'Поиск субдир: ' + IncludeTrailingPathDelimiter(Directory) + '*');
-    Found := FindFirst(IncludeTrailingPathDelimiter(Directory) + '*', faAnyFile, SearchRec);
     try
+      Found := FindFirst(IncludeTrailingPathDelimiter(Directory) + '*', faAnyFile, SearchRec);
       while Found = 0 do
       begin
         SubDir := SearchRec.Name;

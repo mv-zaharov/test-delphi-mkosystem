@@ -29,9 +29,6 @@ object Form1: TForm1
         Text = #1057#1090#1072#1090#1091#1089': '
         Width = 500
       end>
-    ExplicitLeft = 176
-    ExplicitTop = 248
-    ExplicitWidth = 0
   end
   object PanelChooseTask: TPanel
     Left = 0
@@ -107,7 +104,6 @@ object Form1: TForm1
       TabOrder = 2
       ExplicitLeft = 0
       ExplicitTop = 133
-      ExplicitWidth = 632
       object Label2: TLabel
         Left = 1
         Top = 1
